@@ -1,0 +1,32 @@
+asyncapi: 2.0.0
+info:
+  title: Email Service
+  version: '1.0.0'
+  description: |
+    Manages subscriptions.
+servers:
+  production:
+    url: amqp://rabbitmq:5672
+    protocol: amqp
+channels:
+  subscription:
+    subscribe:
+      operationId: subscription
+      message:
+        $ref : '#/components/messages/SubscriptionMessage'
+      bindings:
+        amqp:
+          exchange:
+            name: queue.subscription.messages
+            type: topic
+            durable: true
+            autoDelete: false
+components:
+  messages:
+    SubscriptionMessage:
+      name: subscriptionMessage
+      title: subscription event
+      summary: Inform about a new subscription in the system
+      contentType: application/json
+      payload:
+        $ref: '../schemas/Subscriptions.yaml'

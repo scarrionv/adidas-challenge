@@ -1,0 +1,85 @@
+version: '3'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "4369:4369"
+      - "5671:5671"
+      - "5672:5672"
+      - "25672:25672"
+      - "15672:15672" # rabbitmq admin console
+  postgres-db:
+    image: 'postgres:13.1-alpine'
+    container_name: postgres-db
+    environment:
+      - POSTGRES_USER=compose-postgres
+      - POSTGRES_PASSWORD=compose-postgres
+    ports:
+      - "5432:5432"
+  eureka-server:
+    image: 'eureka-server:0.0.1-SNAPSHOT'
+    container_name: spring-cloud-eureka-server
+    environment:
+      - SERVER_PORT=8761
+    restart: always
+    ports:
+      - "8761:8761"
+  cloud-gateway-service:
+    image: 'cloud-gateway-service:0.0.1-SNAPSHOT'
+    container_name: cloud-gateway-service
+    environment:
+      - SERVER_PORT=8088
+      - EUREKA_URI=http://eureka-server:8761/eureka
+    restart: always
+    ports:
+      - "8088:8088"
+  email-service:
+    image: 'email-service:0.0.1-SNAPSHOT'
+    container_name: email-service
+    depends_on:
+      - rabbitmq
+    restart: always
+    ports:
+      - "8085:8085"
+    environment:
+      - SERVER_PORT=8085
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+  public-service:
+    image: 'public-service:0.0.1-SNAPSHOT'
+    container_name: public-service
+    depends_on:
+      - eureka-server
+      - subscription-service
+    environment:
+      - EUREKA_URI=http://eureka-server:8761/eureka
+      - SERVER_PORT=8082
+      - SPRING_CLOUD_GATEWAY_URL=http://cloud-gateway-service:8088
+      - FEIGN_LOG_LEVEL=full
+    restart: always
+    ports:
+      - "8082:8082"
+  subscription-service:
+    image: 'subscription-service:0.0.1-SNAPSHOT'
+    container_name: subscription-service
+    depends_on:
+      - eureka-server
+      - rabbitmq
+      - postgres-db
+    environment:
+      - EUREKA_URI=http://eureka-server:8761/eureka
+      - SERVER_PORT=8084
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=compose-postgres
+      - SPRING_DATASOURCE_PASSWORD=compose-postgres
+      - SPRING_JPA_DDLAUTO=create
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+    restart: always
+    ports:
+      - "8084:8084"

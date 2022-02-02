@@ -1,0 +1,9 @@
+Error:
+  properties:
+    type:
+      type: string
+    message:
+      type: string
+    status:
+      type: integer
+      format: int32

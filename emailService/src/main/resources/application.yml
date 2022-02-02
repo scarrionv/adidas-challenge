@@ -1,0 +1,29 @@
+server:
+  port : ${SERVER_PORT:8084}
+spring:
+  application:
+    name: emailService
+  cloud:
+    function:
+      definition: subscription
+    stream:
+      rabbit:
+        bindings:
+          subscription:
+            consumer:
+              autoBindDlq: true # Create a dead letter queue letter to send messages that can not being processed
+      bindings:
+        subscription-in-0:
+          destination: queue.subscription.messages
+          binder: rabbit
+          group: subscription_service # Define a single consumer group for all instances of this service
+      binders:
+        rabbit:
+          type: rabbit
+          environment:
+            spring:
+              rabbitmq:
+                host: ${SPRING_RABBITMQ_HOST:localhost}
+                port: ${SPRING_RABBITMQ_PORT:5672}
+                username: ${SPRING_RABBITMQ_USERNAME:guest}
+                password: ${SPRING_RABBITMQ_PASSWORD:guest}

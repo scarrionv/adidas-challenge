@@ -1,0 +1,42 @@
+server:
+  port : ${SERVER_PORRT:8080}
+
+eureka:
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka}
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    metadataMap:
+      instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    hostname: ${HOSTNAME:localhost}
+spring:
+  application:
+    name: subscriptionservice
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/postgres}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: ${SPRING_JPA_DDLAUTO:update}
+  cloud:
+    stream:
+      bindings:
+        subscription-out-0: # with spring cloud stream naming convention for channels
+          destination: queue.subscription.messages # exchange name in rabbit
+          binder: rabbit
+      binders:
+        rabbit:
+          type: rabbit
+          environment:
+            spring:
+              rabbitmq:
+                host: ${SPRING_RABBITMQ_HOST:localhost}
+                port: ${SPRING_RABBITMQ_PORT:5672}
+                username: ${SPRING_RABBITMQ_USERNAME:guest}
+                password: ${SPRING_RABBITMQ_PASSWORD:guest}
+

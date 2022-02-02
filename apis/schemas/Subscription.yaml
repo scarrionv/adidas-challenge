@@ -1,0 +1,23 @@
+Subscription:
+  type: object
+  required:
+    - email
+    - consent
+    - newsletterId
+  properties:
+    email:
+      type: string
+      format: email
+    firstName:
+      type: string
+    gender:
+      enum:
+        - MALE
+        - FEMALE
+        - OTHER
+    consent:
+      type: boolean
+      description: True if constent
+    newsletterId:
+      type: integer
+      format: int32

@@ -1,0 +1,99 @@
+openapi: 3.0.3
+info:
+  title: Subscriptions Public
+  description: API that provide all operations to manage subscriptions from a public network
+  version: 1.0.0
+  contact:
+    name: Santiago Carrion
+    email: carrionvs@gmail.com
+servers:
+  - url: '{scheme}://{balancer}/{servicename}/api'
+    variables:
+      balancer:
+        default: localhost:8088
+      servicename:
+        default: publicservice
+      scheme:
+        enum:
+          - http
+          - https
+        default: https
+paths:
+  /subscrtiptions:
+    get:
+      description: Get all subscription
+      operationId: findSubscriptions
+      responses:
+        '200':
+          description: subscription response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../schemas/Subscription.yaml'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      description: Create new subscription. Duplicates are allowed
+      operationId: addSubscription
+      requestBody:
+        description: email to subscribe
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../schemas/Subscription.yaml'
+      responses:
+        '200':
+          description: ID of the new subcription created
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: Int32
+        default:
+          $ref: '#/components/response/Error'
+  /subscriptions/{subscriptionId}:
+    get:
+      description: Get details of a subscription based on the ID supplied
+      operationId: findSubscriptionById
+      parameters:
+        - $ref: '#/components/parameters/subscriptionId'
+      responses:
+        '200':
+          description: Subscription response based on the ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/Subscription.yaml'
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      description: Cancel existing subscription based on the ID supplied
+      operationId: deleteSubscription
+      parameters:
+        - $ref: '#/components/parameters/subscriptionId'
+      responses:
+        '200':
+          description: OK
+        default:
+          $ref: '#/components/responses/Error'
+components:
+  parameters:
+    subscriptionId:
+      name: subscriptionId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: Int64
+  responses:
+    Error:
+      description: Response error with some information about the error
+      content:
+        application/json:
+          schema:
+           $ref: '../schemas/Error.yaml'
