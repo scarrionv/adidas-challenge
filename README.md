@@ -23,6 +23,7 @@ docker-compose up -d
 * Spring Cloud Netflix
 * Spring Cloud Sleuth
 * Spring Cloud Stream
+* Spring Cloud OpenFeign
 * Spring Boot
 * RabbitMQ
 * Postgresql
